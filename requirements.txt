@@ -1,0 +1,2 @@
+simpleaudio==1.0.2
+pytest==4.2.0

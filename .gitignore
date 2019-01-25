@@ -1,0 +1,7 @@
+# Gitignore based on 
+.idea
+.DS_Store
+__pycache__
+roms/*
+!roms/*.md
+*.pyc

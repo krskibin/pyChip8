@@ -1,0 +1,4 @@
+import emulator
+
+
+emulator.main()
