@@ -20,7 +20,7 @@ PyChip8 is a CHIP-8 computer interpreter written in Python, which allows you to 
 1. Using Pipenv:
 * Open termianl install pipenv and go to project directory
 * In bash terminal write `pipenv install` and then `pipenv shell`
-* To run project use `python pyChip8` command
+* To run project use `python pychip` command
 * Use `deactivate` command to kill pipenv shell :skull: 
 2. Using pip:
 * Open termianl and go to project directory
