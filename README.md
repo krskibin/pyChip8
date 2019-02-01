@@ -32,17 +32,21 @@ PyChip8 is a CHIP-8 computer interpreter written in Python, which allows you to 
 * Use `pip3 install -r requirements.txt` to install all dependencies
 * To run project use `python3 pyChip8` command
 * Use `deactivate` command to kill virtualenv :skull: 
+5. To run project use `python3 pychip`
 
 # Args
 ```
-usage: pychip [-h] [-f ROMS] [-d]
+usage: pychip [-h] [-f ROMS] [-d] [-r RES] [-t DLY] [-s SND]
 
 Chip8 emulator
 
 optional arguments:
-  -h, --help            Show this help message and exit
-  -f ROMS, --file ROMS  Use to provide roms file
-  -d, --disassemler     Runs disassembler for given roms file
+  -h, --help            show this help message and exit
+  -f ROMS, --file ROMS  use to provide roms file
+  -d, --disassembler    run disassembler for given roms file
+  -r RES, --res RES     set CHIP-8 screen resolution
+  -t DLY, --time DLY    set emulation delay time
+  -s SND, --sound SND   set sound on/off
 ```
 
 # Tests
