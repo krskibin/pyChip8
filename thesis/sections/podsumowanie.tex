@@ -1,0 +1,10 @@
+\section{Podsumowanie}
+W ramach niniejszej pracy powstał program pozwalający na wczytywanie gier z zewnętrznych plików, a następnie ich emulację, wyświetlanie w środowisku graficznym i interakcję. Na potrzebę użytkownika dowolna jest manipulacja parametrami aplikacji, tak, aby dostosować prędkość działania procesora lub skalę grafiki. Możliwe jest wybieranie innych plików do emulacji za pomocą zawartego w interfejsie graficznym paska menu, lub ich resetowanie.
+
+Emulator uruchamia wszystkie programy opracowanych na maszynę wirtualną~{CHIP-8}.
+
+Projekt w całości spełnia przyjęte wymagania i został opracowany zgodnie z przeprowadzonymi założeniami projektowymi i specyfikacją maszyny wirtualnej \cite{Cowgod}.
+
+
+\subsection{Możliwe udoskonalenia}
+Dalszy rozwój emulatora powinien opierać się na zaimplementowaniu instrukcji dla \textit{Super CHIP-48} \cite{Cowgod}, czyli ulepszonej wersji CHIP-8. Tu potrzebne byłoby również opracowanie ulepszonego mechanizmu wyświetlania grafiki i dodanie przewijania ekranu \cite{Cowgod}. Dobrym pomysłem wydaje się zaimplementowanie \textit{debuggera}, który podświetlałby aktualnie wykonywaną instrukcję w oknie i dawał możliwość ich wykonywania krok po kroku lub cofania, przy okazji wyświetlając w innym miejscu aktualny stan rejestrów. W kwestii zupełnie nowych funkcji można byłoby dodać moduł odpowiedzialny za kompilowanie specjalnie utworzonej odmiany \textit{języka assemblera} do plików, które wczytywałby emulator. Umożliwiałoby to tworzenie własnoręcznie napisanych gier pod tę platformę.

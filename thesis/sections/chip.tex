@@ -1,0 +1,53 @@
+\section{Specyfikacja CHIP-8}
+ CHIP-8 jest to interpretowany język programowania oryginalnie zaprojektowany dla komputerów DIY późnych lat 70 i wczesnych 80. Jego główną ideą było uczynienie procesu tworzenia gier łatwiejszym, a także danie możliwości przenoszenia kodu na różne maszyny. W tym celu opracowane zostało specjalne środowisko uruchomieniowe nazywane maszyną wirtualną. Jego schemat jest ogólnodostępny i dobrze udokumentowany. Język ten nie odniósł większego sukcesu jako stricte komputerowy. Stał on się przede wszystkim głównym oprogramowaniem dla mniejszych urządzeń w latach 80. i 90. szczególnie dla kalkulatorów. Najbardziej znanym modelem jest \textit{TI-83}, wydany przez \textit{Texas Instruments}, do zaawansowanych obliczeń naukowych \cite{Cowgod}.
+
+\subsection{Pamięć}
+ Język CHIP-8 jest kompatybilny z pamięcią \textit{RAM} do 4KB (4086B), której lokalizacja zaczyna się od adresu 0x000 (0) i kończy na 0xFFF (4096). Pierwsze 512 (0x000 - 0x1FF) bajtów odnoszą się do interpretera i nie są używane przez żadne inne programy, które w większości wczytywane są do pamięci od następnego bajtu (0x200), choć zdarzają się również takie, które wczytywane są dopiero przy 1536 (0x600) bajcie.
+
+\subsection{Rejestry}
+  CHIP-8 posiada 8-bitowe rejestry ogólnego przeznaczenia. Ich nazwy zaczynają się od \textit{V}, a następnie jest im przypisana kolejna cyfra heksadecymalna, co daje szesnaście rejestrów (V0-VF), z tym, że rejestr VF jest używany jako flaga dla niektórych instrukcji, dlatego nie powinien być wykorzystywany. Przygotowano także 16-bitowy rejestr nazywany \textit{I} służący głównie do przechowywania adresów pamięci. Warto wspomnieć o dwóch 8-bitowych rejestrach specjalnego przeznaczenia są one wykorzystywane do trzymania stanu dla opóźniacza (ang. delay) i czasomierza. Są one automatycznie obniżane co 60Hz. Istnieją jeszcze tak zwane \textit{pseduo-rejestry} do których nie ma dostępu z wykonywanych programów. Jeden z nich \textit{program counter} (16-bitowy), trzyma adres obecnie wykonywanej komórki w pamięci. Kolejny, \textit{stack pointer} (8-bitowy) jest używany do wskazywania najwyższego poziomu kopca. Natomiast kopiec to tablica szesnastu elementów po 16-bitów, w której trzymane są adresy. Powinny one zostać zwrócone po zakończeniu danego podprogramu (eng. \textit{subroutine}). CHIP-8 pozwala na działanie do szesnastu zagnieżdżonych podprogramów. 
+
+\subsection{Klawiatura}
+Układ klawiszy obsługiwanych przez maszynę wirtualną CHIP-8, odpowiada temu wykorzystanemu w komputerze \textit{COSMAC VIP}. Posiada on klawiaturę heksadecymalną, której schemat znajduje się poniżej:
+\begin{table}[h!]
+ \centering
+ \caption{Układ klawiszy CHIP-8}
+ \label{C8Keyboard}
+ \begin{tabular}{|c|c|c|c|}
+   \hline 
+   1 & 2 & 3 & C\\
+   \hline
+   4 & 5 & 6 & D\\
+   \hline
+   7 & 8 & 9 & E\\
+   \hline
+   A & 0 & B & F\\
+   \hline
+ \end{tabular} 
+\end{table}
+\newpage
+\subsection{Ekran}
+ W oryginalnej implementacji języka CHIP-8 został użyty monochromatyczny ekran o rozmiarze 64x32-piksele. Każdy piksel identyfikowany jest za pomocą współrzędnych \textit{x}, \textit{y}, których numeracja zaczyna się w lewym górnym rogu ekranu. 
+
+\begin{table}[h!]
+  \centering
+  \caption{Format ekranu}
+  \label{C8Display}
+  \begin{tabular}{|c c|}
+    \hline 
+    (0, 0) & (63, 0)\\ [1ex] 
+    (0, 31) & (63, 31)\\ 
+    \hline
+  \end{tabular} 
+\end{table}
+
+Obraz rysowany jest poprzez tak zwane duszki (ang. \textit{sprite}), czyli grupie bajtów odpowiadających binarnej reprezentacji obrazu. Mogą one mieć wielkość do 15 bajtów, co przekłada się na maksymalny rozmiar 8x15 pikseli.\\
+
+Dodatkowo programy wczytane do pamięci urządzenia mogą odnosić się do duszków reprezentujących notacje szesnastkową, czyli znaków od \textit{0} do \textit{F}. Ich dane w postaci heksadecymalnej powinny znajdować się w obszarze pamięci interpretera (adresy od 0x000 do 0x1FF), po włączeniu urządzenia.
+
+
+\subsection{Dźwięk i zegary}
+ W swojej pierwotnej implementacji komputer posiada dwa zegary, jeden służy do opóźnień (ang. \textit{delay timer}), a drugi do sterowania dźwiękiem. Oba zegary aktywne są tylko wtedy, gdy ich rejestry mają wartość większą od zera. Zadaniem pierwszego z nich jest jedynie odejmowanie jedynki z wartości trzymanej w rejestrze DT przy częstotliwości 60Hz. Drugi natomiast robi dokładnie to samo, również odejmując jeden od wartości w rejestrze ST przy dokładnie tej samej częstotliwości. Różnica polega na tym, że w chwili dekrementacji wartości trzymanej w rejestrze, zegar ten uruchamia zamontowany w komputerze brzęczyk. Ma on tylko jeden ton, a jego zakres nie jest nigdzie podany i zależy wyłącznie od autora interpretera.
+ 
+\subsection{Instrukcje procesora}
+Język CHIP-8 posiada 36 różnych instrukcji odnoszących się do działań matematycznych, obsługi grafiki i sterowania wykonywaniem programu. Każda z nich składa się z dwóch bajtów, z czego ten najbardziej znaczący musi być przechowywany w parzyście zaadresowanej komórce pamięci \textit{RAM}. Bajty ładowanych duszów muszą być dopełnione tak, aby nie złamać tej zasady. Lista wszystkich dostępnych kodów procesora wraz z ich opisami jest dostępna w instrukcji komputera \textit{COSMAC VIP} \cite{COSMAC} lub w \textit{Cowgod’s Chip-8 Technical Reference} \cite{Cowgod}.

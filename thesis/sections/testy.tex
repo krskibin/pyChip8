@@ -1,0 +1,70 @@
+\section{Testy}
+Projekt był tworzony zgodnie z techniką \textit{programowania sterowanego testami (ang. \textit{test driven development})} \cite{WOZNIAK}. W związku z tym, przed napisaniem jakiejkolwiek fragmentu kodu najpierw opracowywany był dla niego test. To podejście pomaga utrzymać większą jakość kodu, a także pozwala na szybsze wykrycie, czy dana funkcja zwraca pożądaną wartość lub odpowiednio modyfikuje zmienne. W takim projekcie jak emulator, gdzie najmniejsze odchylenie w generowanych przez program wartościach może sprawić, że emulowany program będzie działał niezgodnie z oczekiwaniami, testy przydają się jako narzędzie wspierające debugowanie kodu.\\
+
+Twórcy \textit{Pythona} w bibliotece standardowej zapewnili pakiet \textit{unittest} odpowiedzialny za testy, jednak w projekcie został użyty \textit{pytest} ze względu na większą ilość narzędzi przydatnych przy pisaniu testów dla dużej ilości danych wejściowych.\\
+
+Ilość interakcji w programie jest mała, a ich każdorazowe wystąpienie bezpośrednio wpływa na stan programu, dlatego uznano, że testy integracyjne i akceptacyjne \cite{WOZNIAK} nie są potrzebne, a do przetestowania aplikacji wystarczą testy jednostkowe.\\
+
+Strukturę testu jednostkowego definiuje zasada \textit{Arrange-Act-Assert} \cite{WOZNIAK}. Na samym początku wszystkie dane  są przygotowywane (arrange) i odizolowywane. Ważne, aby zewnętrzne zależności, takie jak inne klasy, czy obsługa strumieni wejścia i wyjścia zastąpione były atrapami (ang. \textit{mock}). Jest to główna różnica między podejściem jednostkowym, a modułowym, gdzie tego typu zależności są dopuszczalne. Następnym krokiem jest wykonanie działania na testowanym fragmencie kodu (\textit{act}) i sprawdzenie, czy jego wywołanie zwróciło porządny rezultat (\textit{assert}). Przeważnie biblioteki testowe dostarczają odpowiednią funkcjonalność do porównywania danych oczekiwanych z tymi, które są przetwarzane przez sprawdzany fragment programu. Inaczej jest w przypadku modułu \textit{pytest}, który dokonuje tego wykorzystując wbudowaną w język Python funkcję \textit{assert} \cite{PYTEST}. Jej działanie jest podobne do standardowej instrukcji \textit{if} z tą różnicą, że niespełnienie warunku od razu traktowane jest jako błąd \cite{PYTEST}. 
+\begin{lstlisting}[caption={Przykład prostego testu przy użyciu biblioteki \textit{pytest}},captionpos=b]
+class TestProcessor:
+	def test_reset(self):
+		"""
+		Processor.reset() powinien ustawic pointer counter
+		do domyslnej wartosci (0x200)
+		"""
+		# arrange
+		proc = Processor()
+		proc.pc = 0x230
+		
+		# act
+		proc.reset()
+		
+		# assert
+		assert self.pc == 0x200
+\end{lstlisting}
+Kolejnym ważnym komponentem \textit{pytestu} jest parametryzacja testów. Zapewnia ona dostarczenie różnych danych wejściowych i oczekiwanych wyników bez potrzeby tworzenia testów dla innych przypadków \cite{PYTEST}.
+\begin{lstlisting}[caption={Przykład testu sparametryzowanego.},captionpos=b]
+class TestDisasssembler:
+    mask_params = ([0xFDEE, 0xF0EE], [0xE337, 0xE037],
+                   [0x0ABC, 0x00BC], [0x8DCA, 0x800A], 
+                   [0xAACE, 0xA000])
+
+    @pytest.mark.parametrize(("opcode", "expected"), mask_params)
+    def test_opcode_mask(self, opcode, expected):
+        dasm = Disassembler()
+        assert dasm.mask_opcode(opcode) == expected
+\end{lstlisting}
+W obu listingach wewnątrz każdego testu jest tworzony nowy obiekt klasy, do której należy sprawdzana funkcja. Procedurę tę można zautomatyzować, tworząc tak zwane \textit{fixture} \cite{PYTEST}. Są to najczęściej funkcje, których zadaniem jest automatyczne wykonanie się zanim zależne od nich testy zostaną rozpoczęte.
+\begin{lstlisting}[caption={Przykład poprzedniego testu z użyciem \textit{fixture}.},captionpos=b]
+@pytest.fixture(scope="function")
+def dasm(request):
+    return Disassembler()
+
+@pytest.mark.usefixtures('dasm')
+class TestDisassembler:
+    # ...
+    
+    @pytest.mark.parametrize(("opcode", "expected"), mask_params)
+    def test_opcode_mask(self, opcode, expected, dasm):
+        assert dasm.mask_opcode(opcode) == expected
+\end{lstlisting}
+Jak już wcześniej zostało wspomniane, testy jednostkowe nie mogą korzystać z zewnętrznych zależności potrzebnego do utworzenia sprawdzanej klasy lub funkcji. Zamiast nich tworzymy obiekty atrapy. Imitują one jedynie rzeczywistą instancje klasy, jej atrybutu, jak również ich wywołania. W przypadku tego projektu wykorzystano moduł z biblioteki standardowej \textit{unittest.mock}. Dostarcza ona klasę \textit{MagicMock}, jej zadaniem jest tworzenie imitacji obiektów, wtedy, kiedy test wymaga dostępu do ich metod lub atrybutu \cite{MOCK}. Następnie za pomocą \textit{patch} można imitować pola lub funkcje wybranej klasy \textit{MOCK} i nadawać im zwracane wartości.
+\begin{lstlisting}[caption={Przykład przykład testowania za pomocą atrap}, captionpos=b]
+pytest.fixture(scope="function")
+def proc(request):
+    memory = mock.MagicMock()
+    processor = Processor(screen)
+    return processor
+    
+class TestProcessor:
+    extract_params = ([0x0523, 0x0], [0x1fcd, 0x1], [0x2cde, 0x2])
+    @pytest.mark.parametrize(("operand", "expected"), extract_params)
+    def test_extract_opcode(self, operand, expected, proc):
+    mod = f"{self.module_name}.operand"
+    with mock.patch(mod, new_callable=mock.PropertyMock) as mock_op:
+       mock_op.return_value = operand
+       assert proc.extract_opcode() == expected
+\end{lstlisting}
+
+Technika programowania sterowanego testami zapewniła, że od samego początku wdrażania projektu, jego kod był lepszej jakości i łatwiejszy do utrzymywania. Filozofia ta skupia dużą uwagę, na tym, aby każdy fragment programu nadawał się do przetestowania, co pozwalało na szybkie zweryfikowanie, w której części emulatora zwracał niewłaściwe rezultaty. Atrapy przyczyniły się do jeszcze większej izolacji poszczególnych modułów, co gwarantowało, że niepowodzenie danego testu zależało wyłącznie od sprawdzanej funkcji. Dzięki, parametryzacji, możliwe było przebadanie wielu danych wejściowych i porównanie, czy wszystkie zwracają porządny rezultat. To z kolei, pomagało znajdować wartości, których problematyczności nie uwzględniono w pierwszych iteracjach kodu programu.
