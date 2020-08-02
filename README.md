@@ -10,6 +10,7 @@
 
 ## Introduction
 PyChip8 is a CHIP-8 computer interpreter written in Python, which allows you to run programs prepared for this machine directly on your computer. 
+Includes a thesis written in Polish
 
 ## Dependancies:
 - Linux/Unix based OS
